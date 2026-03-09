@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+
+  #contenidor mariadb
+  c_bd3:
+    image: mariadb:10.6
+    container_name: c_bd3
+    #variables entorn (credencials bd)
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user_dawe
+      MYSQL_PASSWORD: pwd
+      MYSQL_DATABASE: db_dawe
+    restart: always
+    #volums
+    volumes:
+      - bd-volume:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  #contenidor cweb - dockerfile
+  c_web:
+    #Diem que llegeixi el Dockerfile
+    build: .
+    container_name: c_web
+    #variables entorn
+    environment:
+      DB_HOST: c_bd3
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user_dawe
+      MYSQL_PASSWORD: pwd
+      MYSQL_DATABASE: db_dawe
+
+    #Port 8080 del host
+    ports:
+      - "8080:80"
+
+    depends_on:
+      - c_bd3
+
+      #bind mount
+    volumes:
+      - ./app:/var/www/html
+
+
+  #volums
+volumes:
+  bd-volume:
